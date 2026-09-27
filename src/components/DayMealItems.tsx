@@ -396,17 +396,6 @@ const DayMealItems = ({ date, onDateChange }: DayMealItemsProps) => {
                         className="border border-gray-200 rounded-lg p-3 sm:p-4 shadow-sm hover:shadow-md transition-shadow"
                       >
                         <div className="flex items-start gap-3 min-w-0">
-                          {product.imageUrl ? (
-                            <img
-                              src={product.imageUrl}
-                              alt={product.name}
-                              className="w-12 h-12 sm:w-14 sm:h-14 object-cover rounded-lg shrink-0"
-                            />
-                          ) : (
-                            <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gray-100 rounded-lg flex items-center justify-center text-[10px] sm:text-xs text-gray-400 shrink-0">
-                              No image
-                            </div>
-                          )}
                           <div className="min-w-0 flex-1">
                             <NavLink to={`/product/${product.eanCode}`}>
                               <p className="font-medium text-gray-900 text-sm sm:text-base leading-tight hover:text-green-700 transition-colors">
