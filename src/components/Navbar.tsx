@@ -1,14 +1,11 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { NavLink } from "react-router-dom";
-
 import { FaUtensils, FaSignOutAlt, FaBars, FaTimes } from "react-icons/fa";
-
 import { useAuth } from "../Context";
 
 function Navbar() {
   const { user, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
   const linkClass = ({ isActive }: { isActive: boolean }) =>
     `px-3 py-1.5 rounded-sm text-sm font-medium transition-colors ${
       isActive
@@ -49,7 +46,11 @@ function Navbar() {
         </NavLink>
         <div className="hidden md:flex items-center gap-1">
           {user && user.role == "Admin" && (
-            <NavLink to="/administration" className={linkClass}>
+            <NavLink
+              to="/administration"
+              className={linkClass}
+              onClick={closeMenu}
+            >
               Administracija
             </NavLink>
           )}
@@ -62,7 +63,6 @@ function Navbar() {
           <NavLink to="/shopping-cart" className={linkClass}>
             Košarica
           </NavLink>
-
           {user ? (
             <button
               onClick={logout}
@@ -88,8 +88,17 @@ function Navbar() {
         </button>
       </div>
       {isMenuOpen && (
-        <div className="md:hidden border-t border-stone-300 bg-stone-100 px-4 py-3">
+        <div className="md:hidden absolute left-0 right-0 top-full border-b border-stone-300 bg-stone-100 px-4 py-3 shadow-md">
           <div className="flex flex-col gap-1">
+            {user && user.role == "Admin" && (
+              <NavLink
+                to="/administration"
+                className={mobileLinkClass}
+                onClick={closeMenu}
+              >
+                Administracija
+              </NavLink>
+            )}
             <NavLink to="/" className={mobileLinkClass} onClick={closeMenu}>
               Početna
             </NavLink>
@@ -106,13 +115,6 @@ function Navbar() {
               onClick={closeMenu}
             >
               Košarica
-            </NavLink>
-            <NavLink
-              to="/my-profile"
-              className={mobileLinkClass}
-              onClick={closeMenu}
-            >
-              Profil
             </NavLink>
             {user ? (
               <button

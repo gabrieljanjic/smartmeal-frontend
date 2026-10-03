@@ -16,14 +16,12 @@ function LoginPage() {
     if (!email || !password) {
       return;
     }
-
     try {
       const res = await axios.post(
         `${import.meta.env.VITE_API_URL}/api/auth/login`,
         { email, password },
         { withCredentials: true },
       );
-      console.log(res);
       if (res.status == 200) {
         setIsAuthenticated(true);
         await refreshAuth();
@@ -50,7 +48,6 @@ function LoginPage() {
             Login
           </h1>
         </div>
-
         <form
           className="w-full flex flex-col gap-4"
           onSubmit={(e) => {
@@ -59,11 +56,11 @@ function LoginPage() {
           }}
         >
           <input
-            type="text"
+            type="email"
             autoFocus
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="Username"
+            placeholder="Email"
             className="border border-stone-300 rounded-md p-3 text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-green-700"
           />
 

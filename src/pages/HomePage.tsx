@@ -9,8 +9,8 @@ import {
 
 const HomePage = () => {
   return (
-    <section className="w-full h-full flex items-center justify-center px-2 bg-stone-100">
-      <div className="w-full max-w-6xl h-full max-h-[850px] flex items-center">
+    <section className="w-full h-full flex items-center justify-center bg-stone-100 px-8 py-12">
+      <div className="w-full max-w-6xl  flex items-center">
         <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
           <div className="flex flex-col justify-center px-4 sm:px-8 lg:px-4 py-8">
             <div className="inline-flex items-center gap-2 w-fit rounded-full bg-white border border-stone-200 px-4 py-2 text-sm text-stone-600 shadow-sm mb-6">
@@ -80,7 +80,7 @@ const HomePage = () => {
               <img
                 src="https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1200&q=85"
                 alt="Fresh groceries and vegetables"
-                className="w-full h-[320px] sm:h-[420px] lg:h-[560px] object-cover"
+                className="w-full h-[320px] sm:h-[420px] lg:h-[560px] object-cover hidden md:flex"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
               <div className="absolute bottom-5 left-5 right-5">
@@ -107,7 +107,7 @@ const HomePage = () => {
                 </div>
               </div>
             </div>
-            <div className="absolute -left-2 sm:-left-6 lg:-left-8 top-8 sm:top-12 bg-white rounded-2xl shadow-lg border border-stone-100 p-4 w-44 sm:w-48">
+            <div className="absolute -left-2 sm:-left-6 lg:-left-8 top-8 sm:top-12 bg-white rounded-2xl shadow-lg border border-stone-100 p-4 w-44 sm:w-48 hidden md:inline">
               <p className="text-xs text-stone-500">Dnevni unos</p>
               <p className="mt-1 text-2xl font-bold text-stone-900">
                 2,140
@@ -130,7 +130,7 @@ const HomePage = () => {
                 </div>
               </div>
             </div>
-            <div className="absolute -right-2 sm:-right-5 lg:-right-6 bottom-16 sm:bottom-20 bg-white rounded-2xl shadow-lg border border-stone-100 p-4 w-44 sm:w-48">
+            <div className="absolute -right-2 sm:-right-5 lg:-right-6 bottom-16 sm:bottom-20 bg-white rounded-2xl shadow-lg border border-stone-100 p-4 w-44 sm:w-48 hidden md:inline">
               <p className="text-xs text-stone-500">Najpovoljnija košarica</p>
               <div className="flex items-end justify-between mt-1">
                 <p className="text-2xl font-bold text-green-700">24.80 €</p>

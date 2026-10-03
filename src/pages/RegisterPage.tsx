@@ -21,7 +21,6 @@ function RegisterPage() {
       toast.error("Lozinka mora imati minimalno 8 znakova");
       return;
     }
-
     try {
       const res = await axios.post(
         `${import.meta.env.VITE_API_URL}/api/auth/register`,
@@ -31,11 +30,9 @@ function RegisterPage() {
       if (res.status == 200) {
         setIsAuthenticated(true);
         await refreshAuth();
-
         setName("");
         setEmail("");
         setPassword("");
-
         navigate("/");
       }
     } catch {
@@ -57,7 +54,6 @@ function RegisterPage() {
             Register
           </h1>
         </div>
-
         <form
           className="w-full flex flex-col gap-4"
           onSubmit={(e) => {
@@ -73,15 +69,13 @@ function RegisterPage() {
             placeholder="Full name"
             className="border border-stone-300 rounded-md p-3 text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-green-700"
           />
-
           <input
-            type="text"
+            type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Email"
             className="border border-stone-300 rounded-md p-3 text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-green-700"
           />
-
           <input
             type="password"
             value={password}
@@ -89,14 +83,12 @@ function RegisterPage() {
             placeholder="Password"
             className="border border-stone-300 rounded-md p-3 text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-green-700"
           />
-
           <button
             type="submit"
             className="bg-green-800 hover:bg-green-900 transition-colors text-stone-50 font-semibold p-3 rounded-md"
           >
             SIGN UP
           </button>
-
           <div className="flex gap-1 justify-center text-sm text-stone-700">
             <p>Already have an account?</p>
             <Link

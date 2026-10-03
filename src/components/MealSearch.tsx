@@ -1,5 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useQuery,
+  useQueryClient,
+  keepPreviousData,
+} from "@tanstack/react-query";
 import axios from "axios";
 import toast from "react-hot-toast";
 import Modal from "react-modal";
@@ -41,6 +45,7 @@ const MealSearch = () => {
   const [amounts, setAmounts] = useState<Record<string, number>>({});
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const today = new Date().toISOString().split("T")[0];
   const [date, setDate] = useState(today);
   const [mealNumber, setMealNumber] = useState(1);
@@ -48,7 +53,7 @@ const MealSearch = () => {
   useEffect(() => {
     const timeout = setTimeout(() => {
       setDebouncedSearch(search.trim());
-    }, 500);
+    }, 300);
 
     return () => clearTimeout(timeout);
   }, [search]);
@@ -75,13 +80,16 @@ const MealSearch = () => {
     },
 
     enabled: debouncedSearch.length > 0,
+    placeholderData: keepPreviousData,
   });
 
   const sortedProducts = useMemo(() => {
+    if (debouncedSearch.length === 0) return [];
+
     return [...products]
       .filter((product) => product.ean.length === 13)
       .sort((a, b) => (b.chains?.length ?? 0) - (a.chains?.length ?? 0));
-  }, [products]);
+  }, [products, debouncedSearch]);
 
   const openModal = (product: Product) => {
     setSelectedProduct(product);
@@ -94,7 +102,7 @@ const MealSearch = () => {
   };
 
   const handleSubmit = async () => {
-    if (!selectedProduct) {
+    if (!selectedProduct || isSubmitting) {
       return;
     }
 
@@ -107,6 +115,8 @@ const MealSearch = () => {
       toast.error("Odaberi obrok.");
       return;
     }
+
+    setIsSubmitting(true);
 
     try {
       const amount = amounts[selectedProduct.ean] ?? 1;
@@ -169,98 +179,112 @@ const MealSearch = () => {
       }
 
       toast.error("Greška.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
     <>
       <div className="max-w-2xl mx-auto p-6 pb-0">
-        <div className="w-full gap-1 flex justify-center items-center">
-          <input
-            className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-500"
-            type="text"
-            placeholder="Pretraži proizvode..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-          <MdClear
-            onClick={() => setSearch("")}
-            className="shrink-0 w-8 h-8 p-2 cursor-pointer hover:bg-gray-200 rounded-full transition-colors duration-200"
-          />
-        </div>
-        {isFetching && (
-          <div className="w-full flex justify-center mt-12">
-            <Loading />
+        <div className="relative">
+          <div className="w-full gap-1 flex justify-center items-center">
+            <input
+              className="w-full border border-gray-300 bg-white rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-500"
+              type="text"
+              placeholder="Pretraži proizvode..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            <MdClear
+              onClick={() => setSearch("")}
+              className="shrink-0 w-8 h-8 p-2 cursor-pointer hover:bg-gray-200 rounded-full transition-colors duration-200"
+            />
           </div>
-        )}
-        {isError && <p className="mt-3 text-sm text-red-500">Greška.</p>}
-        <ul className="mt-4 space-y-3">
-          {sortedProducts.map((product) => (
-            <li
-              key={product.ean}
-              className="flex justify-between items-center border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow"
-            >
-              <div>
-                <p className="font-medium text-gray-900">{product.name}</p>
 
-                {product.brand && (
-                  <p className="text-sm text-gray-600">{product.brand}</p>
-                )}
-                {product.quantity !== null &&
-                product.quantity !== undefined &&
-                product.unit ? (
-                  <p className="text-sm text-gray-900">
-                    {product.quantity} {product.unit}
-                  </p>
-                ) : (
-                  <p className="text-sm text-gray-500">-</p>
-                )}
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {product.chains?.map((chainItem, index) => (
-                    <span
-                      key={`${product.ean}${chainItem.chain}${index}`}
-                      className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded-full"
-                    >
-                      {chainItem.chain}
-
-                      {chainItem.avg_price !== undefined &&
-                        ` – ${chainItem.avg_price} €`}
-                    </span>
-                  ))}
+          {search.trim().length > 0 && (
+            <div className="absolute left-0 right-0 top-full mt-2 z-40 max-h-[60vh] overflow-y-auto bg-white border border-gray-200 rounded-lg shadow-lg p-3">
+              {isFetching && (
+                <div className="w-full flex justify-center py-4">
+                  <Loading />
                 </div>
-              </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <select
-                  value={amounts[product.ean] ?? 1}
-                  onChange={(e) =>
-                    setAmounts((prev) => ({
-                      ...prev,
-                      [product.ean]: Number(e.target.value),
-                    }))
-                  }
-                  className="border border-gray-300 rounded-md text-sm px-2 py-1 outline-none focus:ring-2 focus:ring-gray-500"
-                >
-                  {AMOUNT_OPTIONS.map((n) => (
-                    <option key={n} value={n}>
-                      {n}
-                    </option>
-                  ))}
-                </select>
-                <CiCirclePlus
-                  onClick={() => openModal(product)}
-                  className="w-6 h-6 cursor-pointer hover:scale-110 transition-all duration-200"
-                />
-              </div>
-            </li>
-          ))}
-        </ul>
+              )}
+              {isError && <p className="text-sm text-red-500">Greška.</p>}
+              <ul className="space-y-3">
+                {sortedProducts.map((product) => (
+                  <li
+                    key={product.ean}
+                    className="flex justify-between items-center border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow"
+                  >
+                    <div>
+                      <p className="font-medium text-gray-900">
+                        {product.name}
+                      </p>
+
+                      {product.brand && (
+                        <p className="text-sm text-gray-600">{product.brand}</p>
+                      )}
+                      {product.quantity !== null &&
+                      product.quantity !== undefined &&
+                      product.unit ? (
+                        <p className="text-sm text-gray-900">
+                          {product.quantity} {product.unit}
+                        </p>
+                      ) : (
+                        <p className="text-sm text-gray-500">-</p>
+                      )}
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {product.chains?.map((chainItem, index) => (
+                          <span
+                            key={`${product.ean}${chainItem.chain}${index}`}
+                            className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded-full"
+                          >
+                            {chainItem.chain}
+
+                            {chainItem.avg_price !== undefined &&
+                              ` – ${chainItem.avg_price} €`}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <select
+                        value={amounts[product.ean] ?? 1}
+                        onChange={(e) =>
+                          setAmounts((prev) => ({
+                            ...prev,
+                            [product.ean]: Number(e.target.value),
+                          }))
+                        }
+                        className="border border-gray-300 rounded-md text-sm px-2 py-1 outline-none focus:ring-2 focus:ring-gray-500"
+                      >
+                        {AMOUNT_OPTIONS.map((n) => (
+                          <option key={n} value={n}>
+                            {n}
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        type="button"
+                        onClick={() => openModal(product)}
+                        className="cursor-pointer"
+                      >
+                        <CiCirclePlus className="w-6 h-6 hover:scale-110 transition-all duration-200" />
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
       </div>
       <Modal
         isOpen={isModalOpen}
         onRequestClose={closeModal}
         contentLabel="Add product to meal"
         className="w-full max-w-lg rounded-xl bg-white p-6 shadow-xl outline-none flex flex-col"
-        overlayClassName="fixed inset-0 flex items-center justify-center bg-black/50 p-4"
+        overlayClassName="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
       >
         <h2 className="text-xl font-semibold">Dodaj proizvod</h2>
         {selectedProduct && (
@@ -304,13 +328,15 @@ const MealSearch = () => {
         <div className="mt-6 flex gap-2">
           <button
             onClick={closeModal}
-            className="flex-1 rounded-lg border border-gray-300 px-4 py-2"
+            disabled={isSubmitting}
+            className="flex-1 rounded-lg border border-gray-300 px-4 py-2 disabled:opacity-50"
           >
             Otkaži
           </button>
           <button
             onClick={handleSubmit}
-            className="flex-1 rounded-lg bg-black px-4 py-2 text-white"
+            disabled={isSubmitting}
+            className="flex-1 rounded-lg bg-black px-4 py-2 text-white disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Dodaj
           </button>
