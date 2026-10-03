@@ -2,7 +2,7 @@
 
 Aplikacija za planiranje obroka i pametnu kupovinu — pretraži namirnice, usporedi cijene u tri najveća lanca (Konzum, Lidl, Kaufland), sastavi obroke s automatskim izračunom kalorija, i generiraj listu za kupovinu s praćenjem ukupne cijene.
 
-🔗 **Live demo:** [ambitious-river-09e84b403.3.azurestaticapps.net](https://ambitious-river-09e84b403.3.azurestaticapps.net)
+🔗 **Live demo:** [https://smartmeal.gabrieljanjic.com/)
 
 > ⚠️ Backend je hostan na Azure free tieru koji se uspava nakon perioda neaktivnosti — prvi request nakon pauze (npr. login) može potrajati 10-20 sekundi dok se server probudi. Svaki sljedeći request je brz.
 
@@ -18,12 +18,19 @@ Aplikacija za planiranje obroka i pametnu kupovinu — pretraži namirnice, uspo
 
 ## Značajke
 
-- 🔍 **Pretraga namirnica** preko integracije s [cijene.dev](https://cijene.dev) API-jem — svaka namirnica odmah prikazuje trenutnu cijenu u tri trgovačka lanca: Konzum, Lidl i Kaufland
+- 🔍 **Pretraga namirnica** preko integracije s [cijene.dev](https://cijene.dev) API-jem — svaka namirnica odmah prikazuje trenutnu cijenu u tri trgovačka lanca: Konzum, Lidl i Kaufland. Pretraga koristi debounce i prikazuje rezultate u dropdownu ispod inputa
 - 🍽️ **Planiranje obroka** po danima — dodaj namirnice u obrok, mijenjaj količine, briši ili uređuj stavke
 - 🔥 **Automatski izračun kalorija** za svaki obrok na temelju dodanih namirnica i količina
 - 🛒 **Košarica za kupovinu** — prebaci stavke iz obroka direktno u košaricu, aplikacija automatski izračuna ukupnu cijenu kupovine
 - ✅ **Praćenje kupovine** — označi stavke kao kupljene, uredi količine ili ih ukloni iz košarice
 - 🔐 **Autentifikacija** korisnika putem JWT tokena spremljenog u HttpOnly cookieju
+- 🛡️ **Administracija** — stranica dostupna samo korisnicima s ulogom `Admin`:
+  - popis svih korisnika (ime, email, uloga, datum registracije)
+  - postavljanje ili micanje admin uloge jednim klikom
+  - brisanje korisnika uz potvrdu
+  - zaštita da admin ne može promijeniti vlastitu ulogu niti obrisati samog sebe
+  - responzivan prikaz: tablični raspored na desktopu, kartice na mobitelu
+- 🔒 **Zaštita od dvostrukog klika** na akcijama dodavanja i administracije, dok traje zahtjev gumbi su onemogućeni
 
 ---
 
@@ -32,14 +39,20 @@ Aplikacija za planiranje obroka i pametnu kupovinu — pretraži namirnice, uspo
 **Frontend**
 - React + TypeScript
 - Vite
+- Tailwind CSS
+- TanStack React Query
 - Axios
+- React Router
+- React Hot Toast
+- React Icons
 - Hostano na Azure Static Web Apps
 
 **Backend**
 - .NET (ASP.NET Core Web API)
 - Entity Framework Core
 - Microsoft SQL Server (Azure SQL Database)
-- JWT autentifikacija (HttpOnly cookie)
+- JWT autentifikacija (HttpOnly cookie) s role-based autorizacijom (`User` / `Admin`)
+- Repository pattern (kontroler → `IUserRepository` → `UserRepository` → `DbContext`)
 - Hostano na Azure App Service
 
 **Vanjski servisi**
@@ -87,52 +100,22 @@ Bazni URL produkcijskog API-ja: `https://smartmeal-fgguguhdb9hre6ap.swedencentra
 | PUT | `/api/shopping-cart/{id}/bought-at` | Označava stavku kao kupljenu |
 | DELETE | `/api/shopping-cart/{id}` | Briše stavku iz košarice |
 
----
+### User (samo za uloge `Admin`)
 
-## Pokretanje lokalno
+| Metoda | Ruta | Opis |
+|---|---|---|
+| GET | `/api/User` | Dohvaća popis svih korisnika (id, ime, email, uloga, datum registracije) |
+| PUT | `/api/User/{id}/toggle-admin` | Mijenja ulogu korisnika između `User` i `Admin`. Vraća `400` ako admin pokuša promijeniti vlastitu ulogu |
+| DELETE | `/api/User/{id}` | Briše korisnika. Vraća `400` ako admin pokuša obrisati samog sebe |
 
-### Preduvjeti
-- Node.js 18+
-- .NET SDK
-- SQL Server (lokalni ili Azure SQL)
-
-### Frontend
-
-```bash
-git clone https://github.com/tvoj-username/smartmeal-frontend.git
-cd smartmeal-frontend
-npm install
-```
-
-Napravi `.env` fajl u rootu s varijablom:
-
-```
-VITE_API_URL=https://localhost:7134
-```
-
-Pokreni dev server:
-
-```bash
-npm run dev
-```
-
-### Backend
-
-Backend se nalazi u zasebnom repozitoriju: [smartmeal-backend](#) <!-- dodaj link kad postaviš -->
-
-Konfiguriraj connection string i JWT postavke u `appsettings.Development.json`, zatim:
-
-```bash
-dotnet ef database update
-dotnet run
-```
+Svi endpointi u ovoj skupini zahtijevaju prijavu i ulogu `Admin`, a nepostojeći korisnik vraća `404`.
 
 ---
 
 ## Arhitektura i deployment
 
 - **Frontend** — deployan preko GitHub Actions na Azure Static Web Apps, automatski build i deploy na svaki push na `main` granu
-- **Backend** — .NET Web API hostan na Azure App Service (Linux, F1 Free tier)
+- **Backend** — .NET Web API hostan na Azure App Service (Linux, F1 Free tier), podijeljen na kontrolere (HTTP sloj) i repozitorije (pristup bazi) registrirane preko dependency injectiona
 - **Baza** — Azure SQL Database (Free tier)
 - CORS konfiguriran da dopušta zahtjeve isključivo s produkcijske frontend domene i localhosta za razvoj
 
