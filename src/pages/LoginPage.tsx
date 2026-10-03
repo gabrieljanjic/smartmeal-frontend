@@ -35,21 +35,21 @@ function LoginPage() {
   };
 
   return (
-    <section className="w-full h-full flex items-center justify-center px-2 bg-stone-100">
-      <div className="border border-stone-300 bg-white p-8 rounded-2xl w-full max-w-md flex flex-col items-center gap-6 shadow-sm">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-11 h-11 rounded-sm flex items-center justify-center bg-green-800">
-            <FaUtensils size={18} className="text-stone-50" />
+    <section className="w-full h-full overflow-y-auto flex items-center justify-center px-3 py-4 sm:px-4 bg-stone-100">
+      <div className="border border-stone-300 bg-white p-5 sm:p-8 rounded-xl sm:rounded-2xl w-full max-w-xs sm:max-w-md flex flex-col items-center gap-4 sm:gap-6 shadow-sm">
+        <div className="flex flex-col items-center gap-2 sm:gap-3">
+          <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-sm flex items-center justify-center bg-green-800">
+            <FaUtensils className="text-stone-50 text-[15px] sm:text-[18px]" />
           </div>
           <h1
-            className="text-3xl font-bold text-stone-900"
+            className="text-2xl sm:text-3xl font-bold text-stone-900"
             style={{ fontFamily: "'Barlow Condensed', sans-serif" }}
           >
             Login
           </h1>
         </div>
         <form
-          className="w-full flex flex-col gap-4"
+          className="w-full flex flex-col gap-3 sm:gap-4"
           onSubmit={(e) => {
             e.preventDefault();
             handleSubmit();
@@ -61,7 +61,7 @@ function LoginPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Email"
-            className="border border-stone-300 rounded-md p-3 text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-green-700"
+            className="border border-stone-300 rounded-md px-3 py-2 sm:p-3 text-base sm:text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-green-700"
           />
 
           <input
@@ -69,17 +69,17 @@ function LoginPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Password"
-            className="border border-stone-300 rounded-md p-3 text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-green-700"
+            className="border border-stone-300 rounded-md px-3 py-2 sm:p-3 text-base sm:text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-green-700"
           />
 
           <button
             type="submit"
-            className="bg-green-800 hover:bg-green-900 transition-colors text-stone-50 font-semibold p-3 rounded-md"
+            className="bg-green-800 hover:bg-green-900 transition-colors text-stone-50 font-semibold text-sm sm:text-base px-3 py-2 sm:p-3 rounded-md"
           >
             LOG IN
           </button>
 
-          <div className="flex gap-1 justify-center text-sm text-stone-700">
+          <div className="flex flex-wrap gap-1 justify-center text-xs sm:text-sm text-stone-700">
             <p>Don't have an account?</p>
             <Link
               to="/register"
